@@ -23,4 +23,16 @@ class BlockTest {
     }
 
 
+    @Test
+    @DisplayName("Testing the genesis block initialization")
+    void genesisBlock() {
+        var currentInstant = Instant.now();
+        var genesisBlock = Block.genesisBlock();
+        assertAll(
+                () -> assertNotNull(genesisBlock),
+                () -> assertTrue(currentInstant.compareTo(genesisBlock.timestamp()) >= 0),
+                () -> assertTrue(genesisBlock.data().isEmpty()),
+                () -> assertNull(genesisBlock.lastHash())
+        );
+    }
 }
