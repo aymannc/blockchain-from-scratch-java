@@ -5,8 +5,8 @@ import com.naitcherif.blockchain.utils.ShaUtils;
 import java.time.Instant;
 
 public record Block(Instant timestamp, String lastHash, String hash, String data) {
-    public Block(String lastHash, String data) {
-        this(Instant.now(), lastHash, ShaUtils.digest(data), data);
+    public Block(Block lastBlock, String data) {
+        this(Instant.now(), lastBlock.hash, ShaUtils.digest(data), data);
     }
 
     public static Block genesisBlock() {

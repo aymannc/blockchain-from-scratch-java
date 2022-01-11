@@ -11,19 +11,6 @@ import static org.junit.jupiter.api.Assertions.*;
 class BlockTest {
 
     @Test
-    @DisplayName("Testing Blocks initialization")
-    void initBlock() {
-        var instant = Instant.now();
-        Block block = new Block("", "Hello");
-        assertAll(
-                () -> assertNotNull(block),
-                () -> assertTrue(instant.compareTo(block.timestamp()) <= 0),
-                () -> assertFalse(block.hash().isEmpty())
-        );
-    }
-
-
-    @Test
     @DisplayName("Testing the genesis block initialization")
     void genesisBlock() {
         var currentInstant = Instant.now();
@@ -33,6 +20,21 @@ class BlockTest {
                 () -> assertTrue(currentInstant.compareTo(genesisBlock.timestamp()) >= 0),
                 () -> assertTrue(genesisBlock.data().isEmpty()),
                 () -> assertNull(genesisBlock.lastHash())
+        );
+    }
+
+    @Test
+    @DisplayName("Testing mining new blocks")
+    void mineBlock() {
+        var instant = Instant.now();
+        var genesisBlock = Block.genesisBlock();
+        var minedData = "Mined Data";
+        var minedBlock = new Block(genesisBlock, minedData);
+        assertAll(
+                () -> assertNotNull(genesisBlock),
+                () -> assertEquals(genesisBlock.hash(), minedBlock.lastHash()),
+                () -> assertTrue(instant.compareTo(minedBlock.timestamp()) <= 0),
+                () -> assertFalse(minedBlock.hash().isEmpty())
         );
     }
 }
