@@ -90,4 +90,41 @@ class BlockchainTest {
         List<Block> chain = List.of(Block.genesisBlock(), firstBlock, secondBlock, thirdBlock);
         assertTrue(Blockchain.isChainValid(chain));
     }
+
+    @Test()
+    @DisplayName("should throw exception on chain length")
+    void shouldThrowExceptionOnReplaceChainLength() {
+        List<Block> newChain = List.of(Block.genesisBlock());
+        Blockchain.addBlock("Block 1");
+        Blockchain.addBlock("Block 2");
+        IllegalArgumentException thrown = assertThrows(
+                IllegalArgumentException.class,
+                () -> Blockchain.replaceChain(newChain)
+        );
+        assertTrue(thrown.getMessage().contains("smaller"));
+    }
+
+    @Test()
+    @DisplayName("should throw exception on chain validity")
+    void shouldThrowExceptionOnReplaceChainValidity() {
+        List<Block> newChain = List.of(new Block(Instant.now(), Block.genesisBlock(), "Block 2"),
+                new Block(Instant.now(), Block.genesisBlock(), "Block 1"));
+        IllegalArgumentException thrown = assertThrows(
+                IllegalArgumentException.class,
+                () -> Blockchain.replaceChain(newChain)
+        );
+        assertTrue(thrown.getMessage().contains("invalid"));
+    }
+
+    @Test()
+    @DisplayName("should replace chain")
+    void shouldReplaceChain() {
+        var oldChain = Blockchain.getChain();
+        List<Block> newChain = List.of(Block.genesisBlock(), new Block(Instant.now(), Block.genesisBlock(), "Block 1"));
+        Blockchain.replaceChain(newChain);
+        assertAll(
+                () -> assertNotEquals(Blockchain.getChain(), oldChain),
+                () -> assertEquals(Blockchain.getChain(), newChain)
+        );
+    }
 }

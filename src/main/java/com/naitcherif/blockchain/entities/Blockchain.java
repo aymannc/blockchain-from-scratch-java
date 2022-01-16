@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public record Blockchain(List<Block> chain) {
-    private static final Blockchain instance = new Blockchain();
+    private static Blockchain instance = new Blockchain();
 
     public Blockchain() {
         this(new ArrayList<>(List.of(Block.genesisBlock())));
@@ -57,5 +57,12 @@ public record Blockchain(List<Block> chain) {
             return true;
         }
         return true;
+    }
+
+    public static void replaceChain(List<Block> chain) {
+        if (instance.chain.size() < chain.size() && isChainValid(chain)) {
+            instance = new Blockchain(chain);
+        } else
+            throw new IllegalArgumentException("The new chain is smaller than the old chain or it's invalid!");
     }
 }
