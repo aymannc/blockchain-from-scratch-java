@@ -29,7 +29,7 @@ class BlockTest {
         var instant = Instant.now();
         var genesisBlock = Block.genesisBlock();
         var minedData = "Mined Data";
-        var minedBlock = new Block(genesisBlock, minedData);
+        var minedBlock = new Block(Instant.now(),genesisBlock, minedData);
         assertAll(
                 () -> assertNotNull(genesisBlock),
                 () -> assertEquals(genesisBlock.hash(), minedBlock.lastHash()),

@@ -1,5 +1,7 @@
 package com.naitcherif.blockchain.utils;
 
+import com.naitcherif.blockchain.entities.Block;
+
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -34,5 +36,9 @@ public final class ShaUtils {
 
     public static String digest(String input) {
         return bytesToHex(digestBytes(input.getBytes(UTF_8)));
+    }
+
+    public static String digest(Block block) {
+        return digest(block.timestamp() + "-" + block.data() + "-" + block.hash());
     }
 }
