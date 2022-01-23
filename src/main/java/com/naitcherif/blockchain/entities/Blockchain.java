@@ -2,11 +2,13 @@ package com.naitcherif.blockchain.entities;
 
 import com.naitcherif.blockchain.utils.ShaUtils;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
 public record Blockchain(List<Block> chain) {
+    public static int difficulty = 3;
+    public static int testDifficulty = 1;
+    public static int initialDifficulty = 1;
     private static Blockchain instance = new Blockchain();
 
     public Blockchain() {
@@ -15,6 +17,10 @@ public record Blockchain(List<Block> chain) {
 
     public static Blockchain getInstance() {
         return instance;
+    }
+
+    public static void resetInstance() {
+        instance = new Blockchain();
     }
 
     public static Block getLatestBlock() {
@@ -27,7 +33,7 @@ public record Blockchain(List<Block> chain) {
             throw new IllegalArgumentException("Data can't be null");
         List<Block> chain = instance.chain;
         var lastBlock = chain.get(chain.size() - 1);
-        chain.add(new Block(Instant.now(), lastBlock, data));
+        chain.add(Block.mineBlock(lastBlock, data));
     }
 
     public static List<Block> getChain() {
@@ -48,10 +54,10 @@ public record Blockchain(List<Block> chain) {
             for (int i = 1; i < chain.size(); i++) {
                 var previousBlock = chain.get(i - 1);
                 Block currentBlock = chain.get(i);
-                if (!currentBlock.lastHash().equals(previousBlock.hash()))
+                if (!currentBlock.getLastHash().equals(previousBlock.getHash()))
                     return false;
-                var calculatedHash = ShaUtils.digest(previousBlock);
-                if (!currentBlock.hash().equals(calculatedHash))
+                var calculatedHash = ShaUtils.digest(currentBlock);
+                if (!currentBlock.getHash().equals(calculatedHash))
                     return false;
             }
             return true;
@@ -64,5 +70,9 @@ public record Blockchain(List<Block> chain) {
             instance = new Blockchain(chain);
         } else
             throw new IllegalArgumentException("The new chain is smaller than the old chain or it's invalid!");
+    }
+
+    public static void updateDifficulty(int newDifficulty) {
+        difficulty = newDifficulty;
     }
 }

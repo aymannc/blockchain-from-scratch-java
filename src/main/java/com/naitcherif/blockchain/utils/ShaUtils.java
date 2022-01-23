@@ -6,6 +6,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
 
 public final class ShaUtils {
 
@@ -38,7 +39,19 @@ public final class ShaUtils {
         return bytesToHex(digestBytes(input.getBytes(UTF_8)));
     }
 
-    public static String digest(Block block) {
-        return digest(block.timestamp() + "-" + block.data() + "-" + block.hash());
+    public static String digest(Instant timestamp, String lastHash, String data, int difficulty, int nones) {
+        if (timestamp == null || data == null) {
+            throw new IllegalArgumentException("timestamp or data is null");
+        }
+        return digest(timestamp + "-" + (lastHash == null ? "" : lastHash) + "-" + data + "-" + difficulty + "-" + nones);
+    }
+
+    public static String digest(Block previousBlock) {
+        return digest(previousBlock.getTimestamp(),
+                previousBlock.getLastHash(),
+                previousBlock.getData(),
+                previousBlock.getDifficulty(),
+                previousBlock.getNones()
+        );
     }
 }

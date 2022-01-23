@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 
+import static com.naitcherif.blockchain.entities.Blockchain.testDifficulty;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Testing Blocks")
@@ -17,9 +18,8 @@ class BlockTest {
         var genesisBlock = Block.genesisBlock();
         assertAll(
                 () -> assertNotNull(genesisBlock),
-                () -> assertTrue(currentInstant.compareTo(genesisBlock.timestamp()) >= 0),
-                () -> assertTrue(genesisBlock.data().isEmpty()),
-                () -> assertNull(genesisBlock.lastHash())
+                () -> assertTrue(currentInstant.compareTo(genesisBlock.getTimestamp()) >= 0),
+                () -> assertNull(genesisBlock.getLastHash())
         );
     }
 
@@ -29,12 +29,13 @@ class BlockTest {
         var instant = Instant.now();
         var genesisBlock = Block.genesisBlock();
         var minedData = "Mined Data";
-        var minedBlock = new Block(Instant.now(),genesisBlock, minedData);
+        var minedBlock = Block.mineBlock(genesisBlock, minedData, testDifficulty);
         assertAll(
                 () -> assertNotNull(genesisBlock),
-                () -> assertEquals(genesisBlock.hash(), minedBlock.lastHash()),
-                () -> assertTrue(instant.compareTo(minedBlock.timestamp()) <= 0),
-                () -> assertFalse(minedBlock.hash().isEmpty())
+                () -> assertEquals(genesisBlock.getHash(), minedBlock.getLastHash()),
+                () -> assertTrue(instant.compareTo(minedBlock.getTimestamp()) <= 0),
+                () -> assertFalse(minedBlock.getHash().isEmpty()),
+                () -> assertTrue(minedBlock.getHash().startsWith("0".repeat(testDifficulty)))
         );
     }
 }
