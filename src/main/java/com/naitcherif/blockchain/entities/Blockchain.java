@@ -2,36 +2,39 @@ package com.naitcherif.blockchain.entities;
 
 import com.naitcherif.blockchain.utils.ShaUtils;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
 public record Blockchain(List<Block> chain) {
-    public static int difficulty = 3;
-    public static int testDifficulty = 1;
-    public static int initialDifficulty = 1;
-    private static Blockchain instance = new Blockchain();
+    public static int STARTING_DIFFICULTY = 3;
+    public static int DIFFICULTY = 3;
+    public static int TEST_DIFFICULTY = 1;
+    public static int MINE_RATE = 1000;
+    private static Blockchain INSTANCE = new Blockchain();
 
     public Blockchain() {
         this(new ArrayList<>(List.of(Block.genesisBlock())));
     }
 
     public static Blockchain getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
     public static void resetInstance() {
-        instance = new Blockchain();
+        INSTANCE = new Blockchain();
+        DIFFICULTY = Blockchain.STARTING_DIFFICULTY;
     }
 
     public static Block getLatestBlock() {
-        List<Block> chain = instance.chain;
+        List<Block> chain = INSTANCE.chain;
         return chain.get(chain.size() - 1);
     }
 
     public static void addBlock(String data) {
         if (data == null)
             throw new IllegalArgumentException("Data can't be null");
-        List<Block> chain = instance.chain;
+        List<Block> chain = INSTANCE.chain;
         var lastBlock = chain.get(chain.size() - 1);
         chain.add(Block.mineBlock(lastBlock, data));
     }
@@ -66,13 +69,19 @@ public record Blockchain(List<Block> chain) {
     }
 
     public static void replaceChain(List<Block> chain) {
-        if (instance.chain.size() < chain.size() && isChainValid(chain)) {
-            instance = new Blockchain(chain);
+        if (INSTANCE.chain.size() < chain.size() && isChainValid(chain)) {
+            INSTANCE = new Blockchain(chain);
         } else
             throw new IllegalArgumentException("The new chain is smaller than the old chain or it's invalid!");
     }
 
-    public static void updateDifficulty(int newDifficulty) {
-        difficulty = newDifficulty;
+    public static void updateDifficulty(Block previousBlock, Instant instant) {
+        long timestamp = previousBlock.getTimestamp() == Instant.MIN ? 0 : previousBlock.getTimestamp().toEpochMilli();
+        if (instant.toEpochMilli() - timestamp > MINE_RATE) {
+            DIFFICULTY--;
+            if (DIFFICULTY < 1)
+                DIFFICULTY = 1;
+        } else
+            DIFFICULTY++;
     }
 }

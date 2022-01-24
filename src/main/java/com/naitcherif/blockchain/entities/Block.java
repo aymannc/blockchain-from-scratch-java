@@ -17,7 +17,7 @@ public class Block {
     private String hash;
 
     public static Block mineBlock(Block lastBlock, String data) {
-        return mineBlock(lastBlock, data, Blockchain.difficulty);
+        return mineBlock(lastBlock, data, Blockchain.DIFFICULTY);
     }
 
     public static Block mineBlock(Block lastBlock, String data, int difficulty) {
@@ -30,6 +30,7 @@ public class Block {
             nones++;
             hash = ShaUtils.digest(timestamp, lastBlock.hash, data, difficulty, nones);
         } while (!hash.startsWith(difficultyString));
+        Blockchain.updateDifficulty(lastBlock, timestamp);
         return new Block(timestamp, lastBlock.getHash(), difficulty, nones, data, hash);
     }
 
@@ -37,7 +38,7 @@ public class Block {
         String data = "genesis block";
         Block block = new Block(Instant.MIN,
                 null,
-                Blockchain.initialDifficulty,
+                0,
                 0,
                 data,
                 null

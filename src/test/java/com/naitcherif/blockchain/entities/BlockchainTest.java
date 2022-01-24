@@ -4,9 +4,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
 import java.util.List;
 
-import static com.naitcherif.blockchain.entities.Blockchain.testDifficulty;
+import static com.naitcherif.blockchain.entities.Blockchain.MINE_RATE;
+import static com.naitcherif.blockchain.entities.Blockchain.TEST_DIFFICULTY;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Testing Blockchain")
@@ -66,9 +68,9 @@ class BlockchainTest {
     @Test()
     @DisplayName("A chain is invalid when one of its block's lastHash is invalid")
     void checkBlockchainBlockLastHashCaseShouldReturnFalse() {
-        Block invalidBlock = Block.mineBlock(Block.genesisBlock(), "invalidBlock", testDifficulty);
-        Block firstBlock = Block.mineBlock(Block.genesisBlock(), "Block 1", testDifficulty);
-        Block secondBlock = Block.mineBlock(firstBlock, "Block 2", testDifficulty);
+        Block invalidBlock = Block.mineBlock(Block.genesisBlock(), "invalidBlock", TEST_DIFFICULTY);
+        Block firstBlock = Block.mineBlock(Block.genesisBlock(), "Block 1", TEST_DIFFICULTY);
+        Block secondBlock = Block.mineBlock(firstBlock, "Block 2", TEST_DIFFICULTY);
         invalidBlock.setHash("invalid hash");
         List<Block> chain = List.of(Block.genesisBlock(), firstBlock, invalidBlock, secondBlock);
         assertFalse(Blockchain.isChainValid(chain));
@@ -77,9 +79,9 @@ class BlockchainTest {
     @Test()
     @DisplayName("A chain is invalid when one of its attributes is invalid")
     void checkBlockchainBlockLastAttributesShouldReturnFalse() {
-        Block firstBlock = Block.mineBlock(Block.genesisBlock(), "", testDifficulty);
-        Block secondBlock = Block.mineBlock(firstBlock, "Block 2", testDifficulty);
-        Block thirdBlock = Block.mineBlock(secondBlock, "Block 3", testDifficulty);
+        Block firstBlock = Block.mineBlock(Block.genesisBlock(), "", TEST_DIFFICULTY);
+        Block secondBlock = Block.mineBlock(firstBlock, "Block 2", TEST_DIFFICULTY);
+        Block thirdBlock = Block.mineBlock(secondBlock, "Block 3", TEST_DIFFICULTY);
         secondBlock.setData("Block 2 changed");
         List<Block> chain = List.of(Block.genesisBlock(), firstBlock, thirdBlock);
         assertFalse(Blockchain.isChainValid(chain));
@@ -89,9 +91,9 @@ class BlockchainTest {
     @Test()
     @DisplayName("A chain is valid when all of its blocks are valid")
     void checkBlockchainValidityShouldReturnTrue() {
-        Block firstBlock = Block.mineBlock(Block.genesisBlock(), "firstBlock", testDifficulty);
-        Block secondBlock = Block.mineBlock(firstBlock, "secondBlock", testDifficulty);
-        Block thirdBlock = Block.mineBlock(secondBlock, "thirdBlock", testDifficulty);
+        Block firstBlock = Block.mineBlock(Block.genesisBlock(), "firstBlock", TEST_DIFFICULTY);
+        Block secondBlock = Block.mineBlock(firstBlock, "secondBlock", TEST_DIFFICULTY);
+        Block thirdBlock = Block.mineBlock(secondBlock, "thirdBlock", TEST_DIFFICULTY);
         List<Block> chain = List.of(Block.genesisBlock(), firstBlock, secondBlock, thirdBlock);
         assertTrue(Blockchain.isChainValid(chain));
     }
@@ -112,7 +114,7 @@ class BlockchainTest {
     @Test()
     @DisplayName("should throw exception on chain validity")
     void shouldThrowExceptionOnReplaceChainValidity() {
-        Block block = Block.mineBlock(Block.genesisBlock(), "Block 0", testDifficulty);
+        Block block = Block.mineBlock(Block.genesisBlock(), "Block 0", TEST_DIFFICULTY);
         block.setData("Block 1");
         List<Block> newChain = List.of(
                 Block.genesisBlock(),
@@ -129,13 +131,45 @@ class BlockchainTest {
     @DisplayName("should replace chain")
     void shouldReplaceChain() {
         var oldChain = Blockchain.getChain();
-        Block block1 = Block.mineBlock(Block.genesisBlock(), "Block 1", testDifficulty);
-        Block block2 = Block.mineBlock(block1, "Block 2", testDifficulty);
+        Block block1 = Block.mineBlock(Block.genesisBlock(), "Block 1", TEST_DIFFICULTY);
+        Block block2 = Block.mineBlock(block1, "Block 2", TEST_DIFFICULTY);
         List<Block> newChain = List.of(Block.genesisBlock(), block1, block2);
         Blockchain.replaceChain(newChain);
         assertAll(
                 () -> assertNotEquals(Blockchain.getChain(), oldChain),
                 () -> assertEquals(Blockchain.getChain(), newChain)
         );
+    }
+
+    @Test()
+    @DisplayName("should increase difficulty")
+    void shouldIncreaseDifficulty() {
+        Block block = Block.mineBlock(Block.genesisBlock(), "Block 1", TEST_DIFFICULTY);
+        var oldDifficulty = Blockchain.DIFFICULTY;
+        Blockchain.updateDifficulty(block, Instant.ofEpochMilli(block.getTimestamp().toEpochMilli() + MINE_RATE - 100));
+        assertEquals(Blockchain.DIFFICULTY, oldDifficulty + 1);
+    }
+
+    @Test()
+    @DisplayName("should decrease difficulty")
+    void shouldDecreaseDifficulty() {
+        Block block = Block.mineBlock(Block.genesisBlock(), "Block 1", TEST_DIFFICULTY);
+        var oldDifficulty = Blockchain.DIFFICULTY;
+        Blockchain.updateDifficulty(block, Instant.ofEpochMilli(block.getTimestamp().toEpochMilli() + MINE_RATE + 100));
+        assertEquals(Blockchain.DIFFICULTY, oldDifficulty - 1);
+    }
+
+    @Test()
+    @DisplayName("should increase difficulty while mining a new block")
+    void shouldIncreaseDifficultyWhileMiningANewBlock() {
+        Block.mineBlock(Block.genesisBlock(), "Hello", 1);
+        assertEquals(2, Blockchain.DIFFICULTY);
+    }
+
+    @Test()
+    @DisplayName("should decrease difficulty while mining a new block")
+    void shouldDecreaseDifficultyWhileMiningANewBlock() {
+        Block.mineBlock(Block.genesisBlock(), "Hello", 3);
+        assertEquals(2, Blockchain.DIFFICULTY);
     }
 }

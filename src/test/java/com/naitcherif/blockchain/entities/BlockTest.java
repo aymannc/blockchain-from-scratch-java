@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 
-import static com.naitcherif.blockchain.entities.Blockchain.testDifficulty;
+import static com.naitcherif.blockchain.entities.Blockchain.TEST_DIFFICULTY;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Testing Blocks")
@@ -29,13 +29,13 @@ class BlockTest {
         var instant = Instant.now();
         var genesisBlock = Block.genesisBlock();
         var minedData = "Mined Data";
-        var minedBlock = Block.mineBlock(genesisBlock, minedData, testDifficulty);
+        var minedBlock = Block.mineBlock(genesisBlock, minedData, TEST_DIFFICULTY);
         assertAll(
                 () -> assertNotNull(genesisBlock),
                 () -> assertEquals(genesisBlock.getHash(), minedBlock.getLastHash()),
                 () -> assertTrue(instant.compareTo(minedBlock.getTimestamp()) <= 0),
                 () -> assertFalse(minedBlock.getHash().isEmpty()),
-                () -> assertTrue(minedBlock.getHash().startsWith("0".repeat(testDifficulty)))
+                () -> assertTrue(minedBlock.getHash().startsWith("0".repeat(TEST_DIFFICULTY)))
         );
     }
 }
