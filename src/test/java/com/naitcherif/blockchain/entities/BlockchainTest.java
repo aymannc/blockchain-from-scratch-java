@@ -38,7 +38,7 @@ class BlockchainTest {
     @DisplayName("should add a block to the blockchain")
     void shouldAddBlock() {
         String data = "Second block";
-        Block latestBlock = blockchain.addBlock(data);
+        Block latestBlock = blockchain.mineBlock(data);
         assertAll(
                 () -> assertNotNull(latestBlock),
                 () -> assertEquals(latestBlock.getData(), data),
@@ -51,7 +51,7 @@ class BlockchainTest {
     void shouldThrowExceptionAddBlock() {
         IllegalArgumentException thrown = assertThrows(
                 IllegalArgumentException.class,
-                () -> blockchain.addBlock(null)
+                () -> blockchain.mineBlock(null)
         );
 
         assertTrue(thrown.getMessage().contains("null"));
@@ -102,8 +102,8 @@ class BlockchainTest {
     @DisplayName("should throw exception on chain length")
     void shouldThrowExceptionOnReplaceChainLength() {
         List<Block> newChain = List.of(Block.genesisBlock());
-        blockchain.addBlock("Block 1");
-        blockchain.addBlock("Block 2");
+        blockchain.mineBlock("Block 1");
+        blockchain.mineBlock("Block 2");
         IllegalArgumentException thrown = assertThrows(
                 IllegalArgumentException.class,
                 () -> blockchain.replaceChain(newChain)

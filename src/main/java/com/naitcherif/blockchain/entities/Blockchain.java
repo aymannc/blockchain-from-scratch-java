@@ -2,17 +2,19 @@ package com.naitcherif.blockchain.entities;
 
 import com.naitcherif.blockchain.utils.ShaUtils;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Data
 public class Blockchain {
 
     public static final int STARTING_DIFFICULTY = 3;
     public static final int MINE_RATE = 6000;
-    private static int difficulty = 3;
+    private static volatile int difficulty = 3;
 
     private List<Block> chain;
 
@@ -53,23 +55,34 @@ public class Blockchain {
         difficulty = STARTING_DIFFICULTY;
     }
 
-    public static synchronized void updateDifficulty(Block previousBlock, Instant instant) {
+    public static void updateDifficulty(Block previousBlock, Instant instant) {
         long timestamp = previousBlock.getTimestamp() == Instant.MIN ? 0 : previousBlock.getTimestamp().toEpochMilli();
-        if (instant.toEpochMilli() - timestamp > MINE_RATE) {
-            difficulty--;
-            if (difficulty < 1)
-                difficulty = 1;
-        } else
-            difficulty++;
+        synchronized (Blockchain.class) {
+            if (instant.toEpochMilli() - timestamp > MINE_RATE) {
+                difficulty--;
+                if (difficulty < 1)
+                    difficulty = 1;
+            } else
+                difficulty++;
+        }
     }
 
-    public synchronized Block addBlock(String data) {
+    public synchronized Block getLatestBlock() {
+        return chain.get(chain.size() - 1);
+    }
+
+    public synchronized void addBlock(Block block) {
+        chain.add(block);
+    }
+
+    public Block mineBlock(String data) {
         if (data == null)
             throw new IllegalArgumentException("Data can't be null");
-        var lastBlock = chain.get(chain.size() - 1);
-        Block block = Block.mineBlock(lastBlock, data);
-        chain.add(block);
-        return block;
+        Block latestBlock = getLatestBlock();
+        log.info(String.valueOf(latestBlock));
+        var minedBlock = Block.mineBlock(latestBlock, data);
+        addBlock(minedBlock);
+        return minedBlock;
     }
 
     public synchronized void replaceChain(List<Block> newChain) {
