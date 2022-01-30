@@ -1,15 +1,17 @@
 package com.naitcherif.blockchain.entities;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 
-import static com.naitcherif.blockchain.entities.Blockchain.TEST_DIFFICULTY;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Testing Blocks")
 class BlockTest {
+
+    private final int TEST_DIFFICULTY = 1;
 
     @Test
     @DisplayName("Testing the genesis block initialization")

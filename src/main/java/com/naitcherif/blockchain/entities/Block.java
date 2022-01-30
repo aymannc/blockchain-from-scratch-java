@@ -17,7 +17,7 @@ public class Block {
     private String hash;
 
     public static Block mineBlock(Block lastBlock, String data) {
-        return mineBlock(lastBlock, data, Blockchain.DIFFICULTY);
+        return mineBlock(lastBlock, data, Blockchain.getDifficulty());
     }
 
     public static Block mineBlock(Block lastBlock, String data, int difficulty) {
