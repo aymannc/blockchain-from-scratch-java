@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "app.api.endpoint",
+      "type": "java.lang.String",
+      "description": "Common api segment in URL."
+  }
+] }

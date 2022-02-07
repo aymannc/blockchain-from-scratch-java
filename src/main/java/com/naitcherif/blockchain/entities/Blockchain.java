@@ -79,7 +79,6 @@ public class Blockchain {
         if (data == null)
             throw new IllegalArgumentException("Data can't be null");
         Block latestBlock = getLatestBlock();
-        log.info(String.valueOf(latestBlock));
         var minedBlock = Block.mineBlock(latestBlock, data);
         addBlock(minedBlock);
         return minedBlock;
